@@ -1,0 +1,16 @@
+# Markdown stays local (planning, research, notes) — except the project README
+*.md
+!README.md
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
