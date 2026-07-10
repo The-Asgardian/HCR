@@ -1,4 +1,15 @@
-from controller import Robot, Keyboard
+import os
+import sys
+
+import cv2
+from controller import Robot
+
+VISION_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "vision"))
+sys.path.append(VISION_DIR)
+
+from camera import open_camera
+from hands import create_detector, find_hands, draw_hands
+from gestures import classify
 
 SPEED = 3.0
 TURN = 2.0
@@ -13,8 +24,8 @@ right_motor.setPosition(float("inf"))
 left_motor.setVelocity(0.0)
 right_motor.setVelocity(0.0)
 
-keyboard = robot.getKeyboard()
-keyboard.enable(timestep)
+capture = open_camera()
+detector = create_detector()
 
 
 def command_to_speeds(command):
@@ -29,21 +40,17 @@ def command_to_speeds(command):
     return 0.0, 0.0
 
 
-def read_keyboard():
-    key = keyboard.getKey()
-    if key == Keyboard.UP:
-        return "FORWARD"
-    if key == Keyboard.DOWN:
-        return "BACKWARD"
-    if key == Keyboard.LEFT:
-        return "LEFT"
-    if key == Keyboard.RIGHT:
-        return "RIGHT"
-    return "STOP"
-
-
 while robot.step(timestep) != -1:
-    command = read_keyboard()
+    ok, frame = capture.read()
+    if not ok:
+        continue
+    frame = cv2.flip(frame, 1)
+    result = find_hands(detector, frame)
+    draw_hands(frame, result)
+    command = classify(result)
+    cv2.putText(frame, command, (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
+    cv2.imshow("Gestures", frame)
+    cv2.waitKey(1)
     left_speed, right_speed = command_to_speeds(command)
     left_motor.setVelocity(left_speed)
     right_motor.setVelocity(right_speed)

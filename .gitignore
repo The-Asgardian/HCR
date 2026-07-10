@@ -9,5 +9,7 @@ Thumbs.db
 .vscode/
 .idea/
 
+*.wbproj
+
 *.md
 !README.md
