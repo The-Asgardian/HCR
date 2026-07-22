@@ -9,9 +9,8 @@ WorldInfo {
   basicTimeStep 64
 }
 Viewpoint {
-  orientation 0.30472332270793473 0.6830874932044873 -0.6637282374778442 1.1835111768575177
-  position -1.5731172225512131 1.6462057351100228 2.506237334848655
-  follow "TurtleBot3Burger"
+  orientation 0 0 1 0
+  position 0 0 5
 }
 TexturedBackground {
 }
@@ -21,6 +20,81 @@ RectangleArena {
   floorSize 3 3
   wallHeight 0.3
 }
+Solid {
+  translation -0.45 -0.75 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.6 0.6 0.6
+        metalness 0
+        roughness 1
+      }
+      geometry Box {
+        size 2.1 0.06 0.3
+      }
+    }
+  ]
+  name "wall_1"
+  boundingObject Box {
+    size 2.1 0.06 0.3
+  }
+}
+Solid {
+  translation 0.45 0 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.6 0.6 0.6
+        metalness 0
+        roughness 1
+      }
+      geometry Box {
+        size 2.1 0.06 0.3
+      }
+    }
+  ]
+  name "wall_2"
+  boundingObject Box {
+    size 2.1 0.06 0.3
+  }
+}
+Solid {
+  translation -0.45 0.75 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.6 0.6 0.6
+        metalness 0
+        roughness 1
+      }
+      geometry Box {
+        size 2.1 0.06 0.3
+      }
+    }
+  ]
+  name "wall_3"
+  boundingObject Box {
+    size 2.1 0.06 0.3
+  }
+}
+Solid {
+  translation 1.2 1.3 0.011
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0 0
+        metalness 0
+        roughness 1
+      }
+      geometry Box {
+        size 0.3 0.3 0.02
+      }
+    }
+  ]
+  name "goal"
+}
 TurtleBot3Burger {
+  translation -1.2 -1.3 0
+  rotation 0 0 1 1.5708
   controller "gesture_controller"
 }

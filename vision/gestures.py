@@ -3,8 +3,16 @@ import cv2
 from camera import open_camera
 from hands import create_detector, find_hands, draw_hands
 
+WRIST = 0
+INDEX_MCP = 5
+INDEX_PIP = 6
+INDEX_TIP = 8
 FINGER_TIPS = [8, 12, 16, 20]
 FINGER_PIPS = [6, 10, 14, 18]
+
+
+def distance(a, b):
+    return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5
 
 
 def count_fingers(landmarks):
@@ -15,27 +23,51 @@ def count_fingers(landmarks):
     return count
 
 
-def command_for_count(fingers):
-    if fingers == 1:
-        return "FORWARD"
-    if fingers == 2:
-        return "LEFT"
-    if fingers == 3:
-        return "RIGHT"
-    if fingers == 4:
-        return "BACKWARD"
-    return "STOP"
+def index_extended(landmarks):
+    return distance(landmarks[INDEX_TIP], landmarks[WRIST]) > distance(landmarks[INDEX_PIP], landmarks[WRIST])
+
+
+def index_direction(landmarks):
+    dx = landmarks[INDEX_TIP].x - landmarks[INDEX_MCP].x
+    dy = landmarks[INDEX_TIP].y - landmarks[INDEX_MCP].y
+    if abs(dx) > abs(dy):
+        return "WEST" if dx < 0 else "EAST"
+    return "NORTH" if dy < 0 else "SOUTH"
 
 
 def classify(result):
     if not result.hand_landmarks:
         return "STOP"
-    return command_for_count(count_fingers(result.hand_landmarks[0]))
+    landmarks = result.hand_landmarks[0]
+    if count_fingers(landmarks) >= 4:
+        return "STOP"
+    if index_extended(landmarks):
+        return index_direction(landmarks)
+    return "STOP"
+
+
+class Stabilizer:
+    def __init__(self, window=4):
+        self.window = window
+        self.stable = "STOP"
+        self.candidate = "STOP"
+        self.count = 0
+
+    def update(self, command):
+        if command == self.candidate:
+            self.count += 1
+        else:
+            self.candidate = command
+            self.count = 1
+        if self.count >= self.window:
+            self.stable = command
+        return self.stable
 
 
 def main():
     capture = open_camera()
     detector = create_detector()
+    stabilizer = Stabilizer()
     while True:
         ok, frame = capture.read()
         if not ok:
@@ -43,7 +75,7 @@ def main():
         frame = cv2.flip(frame, 1)
         result = find_hands(detector, frame)
         draw_hands(frame, result)
-        command = classify(result)
+        command = stabilizer.update(classify(result))
         cv2.putText(frame, command, (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
         cv2.imshow("Gestures", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
