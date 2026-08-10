@@ -1,4 +1,3 @@
-import math
 import os
 import sys
 
@@ -12,69 +11,91 @@ from camera import open_camera
 from hands import create_detector, find_hands, draw_hands
 from gestures import classify, Stabilizer
 
-WHEEL_RADIUS = 0.033
-WHEEL_SEPARATION = 0.16
-DRIVE_SPEED = 3.0
-TURN_SPEED = 3.0
-HEADING_TOLERANCE = 0.1
+WHEEL_RADIUS = 0.05
+SPEED_PER_LEVEL = 0.14
+DETECT_EVERY = 4
+GOAL = (2.0, 2.0)
+GOAL_RADIUS = 0.5
 
-TARGET_YAW = {
-    "NORTH": math.pi / 2,
-    "EAST": 0.0,
-    "SOUTH": -math.pi / 2,
-    "WEST": math.pi,
+DIRECTION = {
+    "NORTH": (0.0, 1.0),
+    "SOUTH": (0.0, -1.0),
+    "EAST": (1.0, 0.0),
+    "WEST": (-1.0, 0.0),
 }
 
 robot = Robot()
 timestep = int(robot.getBasicTimeStep())
-dt = timestep / 1000.0
 
-left_motor = robot.getDevice("left wheel motor")
-right_motor = robot.getDevice("right wheel motor")
-left_motor.setPosition(float("inf"))
-right_motor.setPosition(float("inf"))
-left_motor.setVelocity(0.0)
-right_motor.setVelocity(0.0)
+wheels = [robot.getDevice("wheel1"), robot.getDevice("wheel2"), robot.getDevice("wheel3"), robot.getDevice("wheel4")]
+for wheel in wheels:
+    wheel.setPosition(float("inf"))
+    wheel.setVelocity(0.0)
+
+gps = robot.getDevice("gps")
+if gps:
+    gps.enable(timestep)
+else:
+    print("no gps device: metrics disabled")
 
 capture = open_camera()
 detector = create_detector()
 stabilizer = Stabilizer()
 
-yaw = math.pi / 2
+
+def set_velocity(vx, vy):
+    speeds = [
+        (vx + vy) / WHEEL_RADIUS,
+        (vx - vy) / WHEEL_RADIUS,
+        (vx - vy) / WHEEL_RADIUS,
+        (vx + vy) / WHEEL_RADIUS,
+    ]
+    for wheel, speed in zip(wheels, speeds):
+        wheel.setVelocity(speed)
 
 
-def angle_diff(a, b):
-    d = a - b
-    while d > math.pi:
-        d -= 2 * math.pi
-    while d < -math.pi:
-        d += 2 * math.pi
-    return d
-
-
-def speeds_for(command, heading):
-    if command not in TARGET_YAW:
+def velocity_for(direction, level):
+    if direction not in DIRECTION:
         return 0.0, 0.0
-    error = angle_diff(TARGET_YAW[command], heading)
-    if abs(error) > HEADING_TOLERANCE:
-        if error > 0:
-            return -TURN_SPEED, TURN_SPEED
-        return TURN_SPEED, -TURN_SPEED
-    return DRIVE_SPEED, DRIVE_SPEED
+    dx, dy = DIRECTION[direction]
+    speed = SPEED_PER_LEVEL * level
+    return dx * speed, dy * speed
 
+
+def at_goal(position):
+    return ((position[0] - GOAL[0]) ** 2 + (position[1] - GOAL[1]) ** 2) ** 0.5 < GOAL_RADIUS
+
+
+direction = "STOP"
+level = 0
+step = 0
+start_time = None
+distance = 0.0
+last = None
+reached = False
 
 while robot.step(timestep) != -1:
-    ok, frame = capture.read()
-    if not ok:
-        continue
-    frame = cv2.flip(frame, 1)
-    result = find_hands(detector, frame)
-    draw_hands(frame, result)
-    command = stabilizer.update(classify(result))
-    cv2.putText(frame, command, (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
-    cv2.imshow("Gestures", frame)
-    cv2.waitKey(1)
-    left_speed, right_speed = speeds_for(command, yaw)
-    left_motor.setVelocity(left_speed)
-    right_motor.setVelocity(right_speed)
-    yaw += WHEEL_RADIUS * (right_speed - left_speed) / WHEEL_SEPARATION * dt
+    step += 1
+    if step % DETECT_EVERY == 0:
+        ok, frame = capture.read()
+        if ok:
+            frame = cv2.flip(frame, 1)
+            result = find_hands(detector, frame)
+            draw_hands(frame, result)
+            direction, level = stabilizer.update(classify(result))
+            cv2.putText(frame, direction + " x" + str(level), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
+            cv2.imshow("Gestures", frame)
+            cv2.waitKey(1)
+    vx, vy = velocity_for(direction, level)
+    set_velocity(vx, vy)
+
+    if gps:
+        position = gps.getValues()
+        if last is not None:
+            distance += ((position[0] - last[0]) ** 2 + (position[1] - last[1]) ** 2) ** 0.5
+        last = position
+        if start_time is None and direction != "STOP":
+            start_time = robot.getTime()
+        if not reached and start_time is not None and at_goal(position):
+            reached = True
+            print("Reached goal in %.1f s, path %.2f m" % (robot.getTime() - start_time, distance))

@@ -15,10 +15,10 @@ def distance(a, b):
     return ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) ** 0.5
 
 
-def count_fingers(landmarks):
+def fingers_extended(landmarks):
     count = 0
     for tip, pip in zip(FINGER_TIPS, FINGER_PIPS):
-        if landmarks[tip].y < landmarks[pip].y:
+        if distance(landmarks[tip], landmarks[WRIST]) > distance(landmarks[pip], landmarks[WRIST]):
             count += 1
     return count
 
@@ -37,20 +37,18 @@ def index_direction(landmarks):
 
 def classify(result):
     if not result.hand_landmarks:
-        return "STOP"
+        return ("STOP", 0)
     landmarks = result.hand_landmarks[0]
-    if count_fingers(landmarks) >= 4:
-        return "STOP"
-    if index_extended(landmarks):
-        return index_direction(landmarks)
-    return "STOP"
+    if not index_extended(landmarks):
+        return ("STOP", 0)
+    return (index_direction(landmarks), fingers_extended(landmarks))
 
 
 class Stabilizer:
     def __init__(self, window=4):
         self.window = window
-        self.stable = "STOP"
-        self.candidate = "STOP"
+        self.stable = ("STOP", 0)
+        self.candidate = ("STOP", 0)
         self.count = 0
 
     def update(self, command):
@@ -75,8 +73,8 @@ def main():
         frame = cv2.flip(frame, 1)
         result = find_hands(detector, frame)
         draw_hands(frame, result)
-        command = stabilizer.update(classify(result))
-        cv2.putText(frame, command, (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
+        direction, level = stabilizer.update(classify(result))
+        cv2.putText(frame, direction + " x" + str(level), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
         cv2.imshow("Gestures", frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break

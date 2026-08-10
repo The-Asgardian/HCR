@@ -10,6 +10,7 @@ Thumbs.db
 .idea/
 
 *.wbproj
+.maze.jpg
 
 *.md
 !README.md

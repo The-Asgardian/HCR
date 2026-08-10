@@ -3,98 +3,164 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/robotis/turtlebot/protos/TurtleBot3Burger.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/kuka/youbot/protos/Youbot.proto"
 
 WorldInfo {
-  basicTimeStep 64
+  basicTimeStep 16
+  contactProperties [
+    ContactProperties {
+      material1 "InteriorWheelMat"
+      coulombFriction [
+        0, 2, 0
+      ]
+      frictionRotation -0.785398 0
+      bounce 0
+      forceDependentSlip [
+        10, 0
+      ]
+    }
+    ContactProperties {
+      material1 "ExteriorWheelMat"
+      coulombFriction [
+        0, 2, 0
+      ]
+      frictionRotation 0.785398 0
+      bounce 0
+      forceDependentSlip [
+        10, 0
+      ]
+    }
+  ]
 }
 Viewpoint {
-  orientation 0 0 1 0
-  position 0 0 5
+  orientation 0.06135799845039547 0.9903785875631198 -0.12403809625530787 0.9264570562911634
+  position 0 0 8
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 RectangleArena {
-  floorSize 3 3
+  floorSize 5 5
   wallHeight 0.3
 }
 Solid {
-  translation -0.45 -0.75 0.15
+  translation -0.85 -1.25 0.15
   children [
     Shape {
       appearance PBRAppearance {
         baseColor 0.6 0.6 0.6
-        metalness 0
         roughness 1
+        metalness 0
       }
       geometry Box {
-        size 2.1 0.06 0.3
+        size 3.3 0.1 0.3
       }
     }
   ]
   name "wall_1"
   boundingObject Box {
-    size 2.1 0.06 0.3
+    size 3.3 0.1 0.3
   }
 }
 Solid {
-  translation 0.45 0 0.15
+  translation 0.85 0 0.15
   children [
     Shape {
       appearance PBRAppearance {
         baseColor 0.6 0.6 0.6
-        metalness 0
         roughness 1
+        metalness 0
       }
       geometry Box {
-        size 2.1 0.06 0.3
+        size 3.3 0.1 0.3
       }
     }
   ]
   name "wall_2"
   boundingObject Box {
-    size 2.1 0.06 0.3
+    size 3.3 0.1 0.3
   }
 }
 Solid {
-  translation -0.45 0.75 0.15
+  translation -0.85 1.25 0.15
   children [
     Shape {
       appearance PBRAppearance {
         baseColor 0.6 0.6 0.6
-        metalness 0
         roughness 1
+        metalness 0
       }
       geometry Box {
-        size 2.1 0.06 0.3
+        size 3.3 0.1 0.3
       }
     }
   ]
   name "wall_3"
   boundingObject Box {
-    size 2.1 0.06 0.3
+    size 3.3 0.1 0.3
   }
 }
 Solid {
-  translation 1.2 1.3 0.011
+  translation 2 2 0.011
   children [
     Shape {
       appearance PBRAppearance {
         baseColor 1 0 0
-        metalness 0
         roughness 1
+        metalness 0
       }
       geometry Box {
-        size 0.3 0.3 0.02
+        size 0.4 0.4 0.02
       }
     }
   ]
   name "goal"
 }
-TurtleBot3Burger {
-  translation -1.2 -1.3 0
-  rotation 0 0 1 1.5708
+Youbot {
+  hidden position_0_0 360.5754712431062
+  hidden position_0_1 294.3369231321265
+  hidden position_0_2 293.98151549019366
+  hidden position_0_3 360.2184913369077
+  hidden linearVelocity_0 -4.3938931112547014e-05 -4.606307058631574e-07 -6.430788038637748e-06
+  hidden angularVelocity_0 3.4289292976924346e-07 5.87246452826455e-05 3.5463285148955736e-06
+  hidden position_1_0 1.1529059979609403e-06
+  hidden rotation_2 0 0 1 1.1530841661783082e-06
+  hidden position_2_0 1.0795946920437224e-07
+  hidden linearVelocity_2 -3.4298392735384106e-05 2.5233572103189305e-07 -1.633450131545047e-05
+  hidden angularVelocity_2 3.6112780099317733e-07 5.872535423739285e-05 1.5076648988202198e-05
+  hidden rotation_3 0 -1 0 1.0745380149674385e-07
+  hidden position_3_0 1.6502551560661874e-07
+  hidden linearVelocity_3 -2.8016197343402295e-05 4.895832765527626e-07 -1.7414103153212486e-05
+  hidden angularVelocity_3 3.6092192225998243e-07 5.7771170512814446e-05 1.5076627471537005e-05
+  hidden rotation_4 0 -1 0 1.6593230851978133e-07
+  hidden position_4_0 -1.0430341035316815e-09
+  hidden linearVelocity_4 -2.0708775561118913e-05 4.415000536619837e-07 -1.7409126170734568e-05
+  hidden angularVelocity_4 3.60342804985579e-07 5.615596607372691e-05 1.507661665755235e-05
+  hidden position_5_0 2.2539224674403508e-10
+  hidden linearVelocity_5 -1.4978284561745395e-05 4.0873636645530355e-07 -1.7425203433029096e-05
+  hidden angularVelocity_5 3.6035889058792433e-07 5.6156028031061524e-05 1.5076608624218368e-05
+  hidden position_6_0 2.643714032190781e-12
+  hidden position_6_1 -2.6409915920431895e-12
+  hidden linearVelocity_6 -9.362573111177706e-06 3.74977809591175e-07 -1.743398514762756e-05
+  hidden angularVelocity_6 3.60366738358465e-07 5.615604447906669e-05 1.507885933916674e-05
+  hidden linearVelocity_7 -5.8632175287241624e-06 3.531371422393208e-07 -1.7436306203174233e-05
+  hidden angularVelocity_7 3.603669633044426e-07 5.6156045534055776e-05 1.5078859172328155e-05
+  hidden linearVelocity_8 -5.561635679581181e-06 3.530161614977102e-07 -1.7443063097714413e-05
+  hidden angularVelocity_8 3.6036698883505497e-07 5.6156045346870684e-05 1.5078859465670678e-05
+  hidden rotation_9 0 -1 0 3.849276573309794
+  hidden linearVelocity_9 -4.473631539245287e-05 -1.1214613516699356e-07 -1.9332017392986933e-05
+  hidden angularVelocity_9 3.191207126949743e-07 5.634123323236771e-05 3.546318463704426e-06
+  hidden rotation_10 0 1 0 5.3103990018655365
+  hidden linearVelocity_10 -4.582649553118577e-05 7.703399267474147e-07 -1.9233100908240497e-05
+  hidden angularVelocity_10 3.631869812928062e-07 5.6254227652171955e-05 3.546296790745941e-06
+  hidden rotation_11 0 1 0 4.954991359932681
+  hidden linearVelocity_11 -4.467571358129004e-05 -8.363270602211668e-07 6.921377447017809e-06
+  hidden angularVelocity_11 3.63799760451974e-07 5.639176595957567e-05 3.5462961531745868e-06
+  hidden rotation_12 0 -1 0 4.20625647950834
+  hidden linearVelocity_12 -4.580466513301492e-05 -1.717728585763821e-06 7.020293930868954e-06
+  hidden angularVelocity_12 3.196340231119625e-07 5.620788625289947e-05 3.5463202205098405e-06
+  translation 2.2204630145966533 -1.1353830704267545 0.10199138593837472
+  rotation -0.005457070909714401 0.9683825929267599 -0.24941005211003758 0.0016111286256073516
   controller "gesture_controller"
 }
